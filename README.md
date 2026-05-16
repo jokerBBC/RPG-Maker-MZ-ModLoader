@@ -65,10 +65,7 @@ js/mods/
 ├── mydrop.js                       # 实战Mod：怪物掉落物扩展
 ├── docs/                           # 文档目录
 │   ├── README.md                   # 项目说明
-│   ├── modloader_CHANGELOG.md      # ModLoader更新日志
-│   ├── RMMZ_Mod开发规范.md         # Mod插件开发规范
-│   ├── RMMZ_ModLoader_开发规范.md  # ModLoader开发规范
-│   └── [ModName]_CHANGELOG.md      # 各Mod专属日志
+│   └── modloader_CHANGELOG.md      # ModLoader更新日志
 └── [你的Mod文件].js                # Mod插件
 ```
 
