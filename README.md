@@ -21,30 +21,54 @@
 | 📋 **Schema模板** | `@define-schema` 可复用模板系统，struct/table 通用定义   |
 
 ***
+## ✨ UI截图
+<div align="center">
+    
 主界面
-**
+
 ![软件主界面](js/mods/docs/img/主界面.png)
 
+</div>
+
+<div align="center">
+
 参数编辑界面
-**
+
 ![软件主界面](js/mods/docs/img/参数界面-一般.png)
 
+</div>
+
+<div align="center">
+
 参数编辑界面-多层套娃
-**
+
 ![软件主界面](js/mods/docs/img/参数界面-多级套娃.png)
 
+</div>
+
+<div align="center">
+
 参数编辑界面-表格
-**
+
 ![软件主界面](js/mods/docs/img/参数界面-表格.png)
 
+</div>
+
+<div align="center">
+
 安装界面
-**
+
 ![软件主界面](js/mods/docs/img/安装.png)
 
+</div>
+
+<div align="center">
+
 删除模式和排序模式
-**
+
 ![软件主界面](js/mods/docs/img/排序与删除.png)
 
+</div>
 
 ## 📥 安装方式
 
