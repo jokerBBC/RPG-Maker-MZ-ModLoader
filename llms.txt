@@ -1,0 +1,29 @@
+# RMMZ Mod Loader (RPG Maker MZ Mod Loader)
+
+> A mod loader and in-game mod manager for RPG Maker MZ (RMMZ) games, with UI for enabling/disabling mods, editing plugin parameters, and reordering load order.
+
+RMMZ Mod Loader runs inside the game and provides an in-game menu to manage mods.  
+It only registers .js plugins into the plugin list; to inject data into the game, a separate data injection mod is required.
+
+Key features:
+- In-game mod management (no need to edit plugins.js manually)
+- Enable/disable mods and edit their parameters
+- Reorder mod load order by drag-and-drop
+- Drag-and-drop installation of .js mods or a `mods/` folder
+- @text aliases for Chinese parameter names
+- @schema templates for struct/table parameters
+
+## Documentation
+
+- [README (Chinese)](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader#readme): Overview, installation, usage
+- [Changelog](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/docs/modloader_CHANGELOG.md): Release history
+
+## Example Mods
+
+- [TestMod.js](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/js/mods/TestMod.js): Basic parameter type tests
+- [TestSchemaMod.js](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/js/mods/TestSchemaMod.js): struct/table and @schema examples
+- [mydrop.js](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/js/mods/mydrop.js): Practical mod – monster drop extensions
+
+## Optional
+
+- [LICENSE](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/LICENSE): MIT License
