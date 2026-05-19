@@ -15,15 +15,15 @@ Key features:
 
 ## Documentation
 
-- [README (Chinese)](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader#readme): Overview, installation, usage
-- [Changelog](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/docs/modloader_CHANGELOG.md): Release history
+- [README (Chinese)](https://github.com/jokerBBC/RPG-maker-mz-mod-loader#readme): Overview, installation, usage
+- [Changelog](https://github.com/jokerBBC/RPG-maker-mz-mod-loader/blob/main/docs/modloader_CHANGELOG.md): Release history
 
 ## Example Mods
 
-- [TestMod.js](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/js/mods/TestMod.js): Basic parameter type tests
-- [TestSchemaMod.js](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/js/mods/TestSchemaMod.js): struct/table and @schema examples
-- [mydrop.js](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/js/mods/mydrop.js): Practical mod – monster drop extensions
+- [TestMod.js](https://github.com/jokerBBC/RPG-maker-mz-mod-loader/blob/main/js/mods/TestMod.js): Basic parameter type tests
+- [TestSchemaMod.js](https://github.com/jokerBBC/RPG-maker-mz-mod-loader/blob/main/js/mods/TestSchemaMod.js): struct/table and @schema examples
+- [mydrop.js](https://github.com/jokerBBC/RPG-maker-mz-mod-loader/blob/main/js/mods/mydrop.js): Practical mod – monster drop extensions
 
 ## Optional
 
-- [LICENSE](https://github.com/jokerBBC/RPG-Maker-MZ-ModLoader/blob/main/LICENSE): MIT License
+- [LICENSE](https://github.com/jokerBBC/RPG-maker-mz-mod-loader/blob/main/LICENSE): MIT License
