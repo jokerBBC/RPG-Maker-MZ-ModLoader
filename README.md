@@ -34,6 +34,14 @@
 
 <div align="center">
 
+主界面-创意工坊
+
+![软件主界面](js/mods/docs/img/主界面-创意工坊.png)
+
+</div>
+
+<div align="center">
+
 主界面
 
 ![软件主界面](js/mods/docs/img/主界面.png)
