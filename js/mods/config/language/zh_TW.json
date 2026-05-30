@@ -174,6 +174,8 @@
   "workshop.sourceHintManage": "工坊Mod不可透過Mod管理器安裝和刪除（可排序）",
   "workshop.sourceHintSubscribe": "請在Steam用戶端創意工坊介面訂閱與取消訂閱",
   "workshop.unnamedPackage": "（未命名訂閱）",
+  "workshop.noPreview": "無預覽圖",
+  "workshop.previewClick": "點擊檢視大圖",
   "detail.labelSource": "來源",
   "detail.sourceLocal": "本地 js/mods",
   "detail.sourceWorkshop": "Steam創意工坊",

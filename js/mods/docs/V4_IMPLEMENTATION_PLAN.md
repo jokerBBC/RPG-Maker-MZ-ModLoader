@@ -63,10 +63,10 @@ js/mods/_workshop/<publishedFileId>/   → junction 指向上述工坊包内 js/
 ### 可选 modloader.json
 
 ```json
-{ "title": "显示名", "entries": ["js/mods/ModA.js"] }
+{ "title": "显示名", "entries": ["ModA.js", "ModB.js"] }
 ```
 
-无 manifest：扫描 `js/mods/*.js`；无则包根目录一层 `.js`（跳过 `ModLoader.js`）。
+无 manifest：扫描 `js/mods/*.js`。`entries` 仅接受文件名（禁止路径），固定解析为 `js/mods/<文件名>`。包根目录 `.js` 不再扫描。预览图：包根 `preview.png`。
 
 ---
 

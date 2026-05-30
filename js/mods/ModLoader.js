@@ -2,7 +2,7 @@
  * @target MZ
  * @plugindesc 游戏内模组管理器（DOM化UI & 现代交互 & 拖放添加Mod & 滑动条/长文本/数据库引用）
  * @author joker创意 / GLM核心代码
- * @version V4.0.0
+ * @version V4.0.1
  *
  * @param Mod Button X
  * @type number
@@ -111,7 +111,7 @@
     // 1. 基础配置与日志系统
     // ================================================================
     const ModName = "ModLoader";
-    const VERSION = "V4.0.0";
+    const VERSION = "V4.0.1";
     const DEBUG_LEVEL = 0;
 
     const log = (level, ...args) => {
@@ -1372,7 +1372,25 @@
     }
 
     /**
-     * 发现工坊包内的脚本列表（modloader.json → js/mods/*.js → 根目录 *.js）
+     * modloader.json entries 仅允许 js/mods 下的 .js 文件名（禁止路径，防目录穿越桥接）
+     */
+    function resolveWorkshopEntryFileName(entry) {
+        const raw = String(entry).trim();
+        if (!raw) return null;
+        if (/[\\/]/.test(raw) || raw.indexOf('..') !== -1) {
+            log(2, '工坊 entries 忽略非法路径项（仅允许文件名）: ' + raw);
+            return null;
+        }
+        const fileName = pathMod.basename(raw);
+        if (!fileName.toLowerCase().endsWith('.js') || fileName === 'ModLoader.js') {
+            log(2, '工坊 entries 忽略无效项（须为 .js 文件名）: ' + raw);
+            return null;
+        }
+        return fileName;
+    }
+
+    /**
+     * 发现工坊包内的脚本列表（modloader.json entries → js/mods/*.js；不再扫描包根目录）
      */
     function discoverWorkshopScripts(root) {
         const scripts = [];
@@ -1380,14 +1398,18 @@
 
         if (manifest && Array.isArray(manifest.entries) && manifest.entries.length > 0) {
             for (const entry of manifest.entries) {
-                const relPath = String(entry).replace(/\\/g, '/');
+                const fileName = resolveWorkshopEntryFileName(entry);
+                if (!fileName) continue;
+                const relPath = 'js/mods/' + fileName;
                 const absPath = pathMod.join(root, relPath);
-                if (fs.existsSync(absPath) && relPath.endsWith('.js')) {
+                if (fs.existsSync(absPath)) {
                     scripts.push({
                         relPath: relPath,
                         absPath: absPath,
                         title: null
                     });
+                } else {
+                    log(2, '工坊 entries 文件不存在: ' + relPath);
                 }
             }
             return scripts;
@@ -1403,22 +1425,98 @@
                     title: null
                 });
             }
-            if (scripts.length > 0) return scripts;
-        }
-
-        try {
-            const rootFiles = fs.readdirSync(root).filter(file => file.endsWith('.js') && file !== 'ModLoader.js');
-            for (const file of rootFiles) {
-                scripts.push({
-                    relPath: file,
-                    absPath: pathMod.join(root, file),
-                    title: null
-                });
-            }
-        } catch (e) {
-            log(2, '扫描工坊根目录失败: ' + root, e.message);
         }
         return scripts;
+    }
+
+    /** 工坊包 preview.png（与 modloader.json 同目录）→ data URL，供详情区展示 */
+    function getWorkshopPreviewPath(workshopRoot) {
+        if (!workshopRoot) return null;
+        const previewPath = pathMod.join(workshopRoot, 'preview.png');
+        return fs.existsSync(previewPath) ? previewPath : null;
+    }
+
+    function readPngDimensions(absPath) {
+        try {
+            const buf = fs.readFileSync(absPath);
+            if (buf.length < 24 || buf[0] !== 0x89) return null;
+            const width = buf.readUInt32BE(16);
+            const height = buf.readUInt32BE(20);
+            if (width > 0 && height > 0 && width <= 50000 && height <= 50000) {
+                return { width: width, height: height };
+            }
+        } catch (e) {
+            log(2, '读取 PNG 尺寸失败: ' + absPath, e.message);
+        }
+        return null;
+    }
+
+    function pathToFileUrl(absPath) {
+        const normalized = pathMod.resolve(absPath).replace(/\\/g, '/');
+        return 'file:///' + encodeURI(normalized).replace(/^\/+/, '');
+    }
+
+    /** 点击缩略图：NW.js 新窗口打开原图（与拖入图片到游戏窗口的行为一致） */
+    function openWorkshopPreviewImage(workshopRoot) {
+        const previewPath = getWorkshopPreviewPath(workshopRoot);
+        if (!previewPath) return;
+        if (typeof nw !== 'object') {
+            log(2, '非 NW.js 环境，无法弹窗预览工坊图片');
+            return;
+        }
+        try {
+            const gui = require('nw.gui');
+            const fileUrl = pathToFileUrl(previewPath);
+            const dims = readPngDimensions(previewPath);
+            const maxW = Math.min((window.screen && window.screen.availWidth) || 1280, 1280) - 40;
+            const maxH = Math.min((window.screen && window.screen.availHeight) || 720, 900) - 40;
+            let w = dims ? dims.width : 800;
+            let h = dims ? dims.height : 600;
+            const scale = Math.min(1, maxW / w, maxH / h);
+            w = Math.max(320, Math.round(w * scale));
+            h = Math.max(240, Math.round(h * scale));
+            gui.Window.open(fileUrl, {
+                position: 'center',
+                width: w,
+                height: h,
+                resizable: true,
+                frame: true,
+                show: true,
+                focus: true
+            }, function(newWin) {
+                if (newWin) newWin.focus();
+            });
+            log(3, '工坊预览图弹窗:', previewPath);
+        } catch (e) {
+            log(2, '打开工坊预览图失败: ' + previewPath, e.message);
+        }
+    }
+
+    function readWorkshopPreviewDataUrl(workshopRoot) {
+        const previewPath = getWorkshopPreviewPath(workshopRoot);
+        if (!previewPath) return null;
+        try {
+            return 'data:image/png;base64,' + fs.readFileSync(previewPath).toString('base64');
+        } catch (e) {
+            log(2, '读取工坊 preview.png 失败: ' + previewPath, e.message);
+            return null;
+        }
+    }
+
+    function buildWorkshopPreviewHtml(mod) {
+        if (mod.source !== 'workshop') return '';
+        const dataUrl = readWorkshopPreviewDataUrl(mod.workshopRoot);
+        let inner;
+        let extraClass = '';
+        let titleAttr = '';
+        if (dataUrl) {
+            inner = '<img src="' + dataUrl + '" alt="" class="ml-workshop-preview-img">';
+            extraClass = ' ml-workshop-preview-clickable';
+            titleAttr = ' title="' + escapeHtml(t('workshop.previewClick')) + '"';
+        } else {
+            inner = '<div class="ml-workshop-preview-empty">' + escapeHtml(t('workshop.noPreview')) + '</div>';
+        }
+        return '<div class="ml-workshop-preview' + extraClass + '"' + titleAttr + '>' + inner + '</div>';
     }
 
     function getConfigMaxOrder(config) {
@@ -3735,10 +3833,16 @@
             `;
         }
 
+        const workshopPreviewHtml = buildWorkshopPreviewHtml(mod);
+        const detailHeaderRowClass = workshopPreviewHtml ? ' ml-detail-header-row' : '';
+
         panel.innerHTML = `
-            <div class="ml-detail-section">
-                <div class="ml-detail-label">${DT.labelModName}</div>
-                <div class="ml-detail-value">${parseColorTagsFromRaw(mod.displayName)}</div>
+            <div class="ml-detail-section${detailHeaderRowClass}">
+                <div class="ml-detail-header-info">
+                    <div class="ml-detail-label">${DT.labelModName}</div>
+                    <div class="ml-detail-value">${parseColorTagsFromRaw(mod.displayName)}</div>
+                </div>
+                ${workshopPreviewHtml}
             </div>
             ${workshopHtml}
             <div class="ml-detail-section">
@@ -3761,6 +3865,14 @@
             </div>
         `;
         
+        const previewEl = panel.querySelector('.ml-workshop-preview-clickable');
+        if (previewEl && mod.workshopRoot) {
+            previewEl.addEventListener('click', function(e) {
+                e.stopPropagation();
+                openWorkshopPreviewImage(mod.workshopRoot);
+            });
+        }
+
         // 切换时滚动条重置到最顶部
         panel.scrollTop = 0;
     }

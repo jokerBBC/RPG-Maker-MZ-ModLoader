@@ -34,27 +34,40 @@
 
 ---
 
-## 包结构（推荐）
+## 包结构（必须）
 
 ```
 <publishedFileId>/
-  modloader.json          # 可选
+  modloader.json          # 可选（多脚本包推荐）
+  preview.png             # 推荐：Mod 详情区预览图（与 modloader.json 同目录）
   js/mods/
     YourMod.js
     AnotherMod.js
 ```
 
+**脚本必须放在 `js/mods/` 下**。包根目录的 `.js` **不再被扫描**（用于规范作者、避免与 manifest / 预览等资源混放）。
+
 ### modloader.json（可选）
 
 ```json
 {
-  "title": "显示名（可选，用于列表展示）",
-  "entries": ["js/mods/YourMod.js", "js/mods/AnotherMod.js"]
+  "title": "显示名（可选，用于详情「工坊订阅」展示）",
+  "entries": ["YourMod.js", "AnotherMod.js"]
 }
 ```
 
-- 无 `modloader.json`：自动扫描 `js/mods/*.js`
-- 仍无脚本：扫描包根目录一层 `.js`（跳过 `ModLoader.js`）
+| 规则 | 说明 |
+|------|------|
+| 无 `modloader.json` | 自动扫描 `js/mods/*.js`（跳过 `ModLoader.js`） |
+| 有 `entries` | **仅写 `js/mods/` 下的文件名**，如 `YourMod.js` |
+| **禁止路径** | `entries` 中带 `/`、`\` 或 `..` 的项会被**忽略**（防止恶意包桥接包外脚本） |
+| 实际路径 | 管理器固定解析为 `js/mods/<文件名>` |
+
+### preview.png（推荐）
+
+- 文件名固定为 **`preview.png`**，与 `modloader.json` 同处包根目录（`<publishedFileId>/preview.png`）
+- Mod 管理器详情区右上角展示；缺失时显示「无预览图」（不影响加载）
+- 建议尺寸：正方形或近正方形，管理器会按详情区宽度的 **1/3** 作为预览框边长，`object-fit: contain` 缩放
 
 ### 同一订阅下多个 `.js` 时，管理器如何显示
 
@@ -68,6 +81,7 @@
 
 - 每行角标仍为 **工坊**；详情 **工坊订阅** 显示为 `工坊ID & modloader.json 的 title`（如 `3000000004 & 多脚本工坊包（V4 自测）`），同包脚本 ID 相同
 - `modloader.json` 的 `title` 仅作包说明，**不会**把多行合并成一个显示名（列表名 = 各脚本文件名）
+- 同包各脚本共用同一张 `preview.png`
 - 自测包：`3000000004`（核心 + 功能A + 功能B）
 
 ### 文件存在性与启动
@@ -84,7 +98,7 @@ ModLoader 从 `js/plugins/` 相对路径加载脚本：
 
 | 来源 | loadPath 示例 |
 |------|----------------|
-| 正式工坊（运行时） | `../mods/_workshop/<fileId>/<脚本名>`（junction 桥接到 `steamapps/workshop/content/<AppID>/...`，非复制） |
+| 正式工坊（运行时） | `../mods/_workshop/<fileId>/<脚本名>`（junction 桥接到 `steamapps/workshop/content/<AppID>/js/mods/...`，非复制） |
 
 **不要**把工坊包复制到 `js/mods/`；玩家通过 Steam 订阅后文件自动落盘。  
 **不支持** `js/mods/workshop_sim/` 开发模拟（无法被 `PluginManager` 加载，已移除）。
@@ -121,10 +135,20 @@ ws:<publishedFileId>:<scriptBaseName>
 
 ```
 steamapps/workshop/content/<你的AppID>/
-  3000000001/   # 框架 Mod → WorkshopFramework.js
-  3000000002/   # @base WorkshopFramework → WorkshopNeedsFramework.js
-  3000000003/   # 独立演示 → WorkshopDemo.js
-  3000000004/   # 多脚本包 → WorkshopMultiCore / FeatA / FeatB
+  3000000001/
+    preview.png
+    js/mods/WorkshopFramework.js
+  3000000002/
+    js/mods/WorkshopNeedsFramework.js
+  3000000003/
+    preview.png
+    js/mods/WorkshopDemo.js
+  3000000004/
+    modloader.json
+    preview.png
+    js/mods/WorkshopMultiCore.js
+    js/mods/WorkshopMultiFeatA.js
+    js/mods/WorkshopMultiFeatB.js
 ```
 
 游戏内 **刷新工坊** 即可扫描；运行时经 `js/mods/_workshop/<fileId>/` junction 加载。
@@ -143,6 +167,7 @@ steamapps/workshop/content/<你的AppID>/
 ## 安全与信任
 
 - 工坊 Mod 与本地 Mod 一样，启用后执行 **JavaScript**，ModLoader **不提供杀毒或沙箱**
+- `modloader.json` 的 `entries` **不接受路径**，仅允许 `js/mods/` 下的文件名，避免桥接包外 `.js`
 - 恶意代码防护依赖 **Steam 工坊审核/举报** 与玩家只订阅信任作者；游戏说明中可写明「Mod 等同用户自行安装插件」
 
 ---
@@ -153,3 +178,5 @@ steamapps/workshop/content/<你的AppID>/
 - 自动复制工坊包到 `js/mods/`
 - 写入 `plugins.js` 或合并 `data/`
 - Mod 脚本病毒扫描 / 沙箱执行
+- 包根目录 `.js` 作为 Mod 脚本（须放 `js/mods/`）
+- `entries` 中带目录路径的写法（如 `js/mods/YourMod.js`）
